@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>飞影数字人视频工坊</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237B5BE0'/%3E%3Ctext x='16' y='23' font-size='18' text-anchor='middle' fill='%23fff' font-family='sans-serif'%3E影%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- 顶部状态条 -->
+    <div class="statusbar">
+      <span id="clock">23:59</span>
+      <span>飞影数字人视频工坊</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="envState" class="py-dot" title="飞影 Token 状态">●</span>
+        <button id="settingsBtn" class="set-btn" title="飞影 API Token 设置">⚙</button>
+      </div>
+    </div>
+
+    <!-- Token 设置弹窗 -->
+    <div class="set-overlay" id="setOverlay">
+      <div class="set-panel">
+        <div class="set-head">
+          <b>⚙ 飞影 API Token 设置</b>
+          <button id="setClose" class="set-x">✕</button>
+        </div>
+        <div class="set-tip">Token 仅保存在本机技能目录的 <code>.env</code> 文件中，不联网、不分享。也可在下方表单里每次手动填。</div>
+        <div id="keyFields" class="key-fields"></div>
+        <div class="set-foot">
+          <button id="setSave" class="btn-main">保存并刷新环境</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="hero">
+        <div class="hero-ic">🎬</div>
+        <div class="hero-t">把文案变成对口型数字人视频</div>
+        <div class="hero-s">输入数字人、声音与口播文案，一键调用飞影开放平台生成视频，自动轮询进度。</div>
+      </div>
+
+      <!-- ID 获取提示 -->
+      <div class="card">
+        <div class="card-h"><b>① 准备参数</b></div>
+        <div class="tip">数字人ID（<code>av_xxx</code>）在飞影后台「数字人」菜单复制；声音ID（<code>voice_xxx</code>）在「声音克隆」菜单复制；Token 在「个人中心」获取。</div>
+      </div>
+
+      <!-- 表单 -->
+      <div class="card">
+        <div class="card-h"><b>② 填写生成参数</b></div>
+
+        <label class="lbl">飞影 API Token（注册号）</label>
+        <input class="field" id="tokenInput" placeholder="粘贴你的飞影 Token，或点右上角 ⚙ 保存">
+        <div style="height:12px"></div>
+
+        <label class="lbl">数字人ID（avatar）</label>
+        <input class="field" id="avatarInput" placeholder="如 av_abc123xyz">
+        <div style="height:12px"></div>
+
+        <label class="lbl">声音ID（voice）</label>
+        <input class="field" id="voiceInput" placeholder="如 voice_abc123">
+        <div style="height:12px"></div>
+
+        <label class="lbl">口播文案</label>
+        <textarea class="field" id="textInput" rows="5" placeholder="输入要数字人说的文案，例如：大家好，今天我们来聊聊 AI 数字人的玩法。"></textarea>
+
+        <div style="height:14px"></div>
+        <div class="row2">
+          <label class="chk"><input type="checkbox" id="subtitleChk" checked> 生成字幕</label>
+          <label class="chk"><input type="checkbox" id="aigcChk"> 关闭 AIGC 水印（会员）</label>
+        </div>
+      </div>
+
+      <!-- 进度 -->
+      <div class="card" id="progressCard">
+        <div class="card-h"><b>③ 生成进度</b></div>
+        <div class="pbar"><i id="progressBar" style="width:0%"></i></div>
+        <div class="step-label" id="stepLabel">等待开始…</div>
+        <div id="genLog" class="logbox">填写参数后点下方按钮开始。</div>
+      </div>
+
+      <!-- 结果 -->
+      <div id="videoWrap" class="card hidden">
+        <div class="card-h"><b>🎉 数字人视频已生成</b></div>
+        <video id="videoEl" controls playsinline></video>
+        <div style="height:12px"></div>
+        <div class="row2">
+          <a id="openLink" class="btn-ghost" target="_blank" rel="noopener">去官网查看 ↗</a>
+          <a id="copyLink" class="btn-main" style="cursor:pointer">复制官网链接</a>
+        </div>
+        <div id="dlWrap" style="margin-top:10px"></div>
+      </div>
+
+      <div class="footer-bar">
+        <button class="btn-ghost" id="resetBtn">清空</button>
+        <button class="btn-main coral" id="genBtn">生成数字人视频 →</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    window._jsErrors = [];
+    window.onerror = function(msg, src, line, col) {
+      var info = { msg: String(msg).slice(0,200), src: src||'', line: line||0, col: col||0, time: new Date().toLocaleTimeString() };
+      window._jsErrors.push(info);
+      console.error('[GLOBAL ERROR]', JSON.stringify(info));
+      return false;
+    };
+    window.onunhandledrejection = function(e) {
+      window.onerror('Unhandled Promise: ' + (e.reason ? (e.reason.message||e.reason) : 'unknown'), 'promise', 0, 0);
+    };
+  </script>
+  <script src="js/app.js"></script>
+</body>
+</html>
